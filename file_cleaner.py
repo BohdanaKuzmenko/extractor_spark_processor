@@ -21,7 +21,6 @@ def get_initial_files(dir_path):
 
 base_dir = abspath('')
 all_files = get_initial_files(join(base_dir,'extractor_data'))
-# all_files = get_initial_files(join(base_dir,'data/initial'))
 print(all_files)
 for file in all_files[:1]:
     file_name = file.split('/')[-1]
@@ -29,5 +28,3 @@ for file in all_files[:1]:
     result = get_bios(file)
     DataHandler.chunk_to_csv(result[['PA', 'SP', 'Score', 'sentence_num', 'url']], "data/initial/{}.csv".format(file_name), header=True)
 
-# result = get_bios("data/initial/part-00000")
-# DataHandler.chunk_to_csv(result[['PA', 'SP', 'Score', 'sentence_num', 'url']], "res.csv", header=True)
