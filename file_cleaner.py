@@ -1,30 +1,26 @@
-import ast
-from pandas import read_csv
-from handlers.df_handler import *
+from pandas import DataFrame
 from handlers.io_data_handler import DataHandler
+import ast
+import datetime
 from os import listdir
 from os.path import isfile, join, dirname, abspath
 
-def test(x):
-    bio_sent_item = ast.literal_eval(x)
-    return tuple([bio_sent_item.get(key) for key in sorted(bio_sent_item)])
-
-
-def get_bios(initial_file):
-    data = read_csv(initial_file, sep="\n", header=None)
-    data[0] = data[0].apply(lambda x: test(x))
-    data = split_data_frame_col(data, ['PA', 'SP', 'Score', 'merged_regex', 'sentence', 'sentence_num', 'url'], data.columns[0])
-    return data
 
 def get_initial_files(dir_path):
     return [join(dir_path, f) for f in listdir(dir_path) if isfile(join(dir_path, f))]
 
 base_dir = abspath('')
 all_files = get_initial_files(join(base_dir,'extractor_data'))
-print(all_files)
-for file in all_files:
-    file_name = file.split('/')[-1]
-    print(file_name)
-    result = get_bios(file)
-    DataHandler.chunk_to_csv(result[['PA', 'SP', 'Score', 'sentence_num', 'url']], "data/initial/{}.csv".format(file_name), header=True)
-
+for file_n in all_files:
+    t1 = datetime.datetime.now()
+    f_name = file_n.split('/')[-1]
+    print(f_name)
+    f = open(file_n)
+    regex_filtered_bios = f.readlines()
+    test = regex_filtered_bios
+    val_dict = [ast.literal_eval(i) for i in test]
+    bios = DataFrame(val_dict)
+    DataHandler.chunk_to_csv(bios[['PA', 'SP', 'Score', 'sentence_num', 'url']], "data/initial/{}.csv".format(f_name),
+                             header="True")
+    t2 = datetime.datetime.now()
+    print(str(t2 - t1))
