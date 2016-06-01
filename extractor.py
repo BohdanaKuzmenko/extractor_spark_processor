@@ -4,6 +4,7 @@
 from handlers.df_handler import *
 from pandas import to_numeric, notnull
 import datetime
+from handlers.io_data_handler import DataHandler
 from numpy import nan
 
 PROFILE_URL_COL = "url"
@@ -46,7 +47,9 @@ class Extractor(object):
         grouped_bios[PRACTICE_AREAS_SCORE_COL] = grouped_bios.groupby([PROFILE_URL_COL, PRACTICE_AREAS_COL])[
             REG_SCORE_COL].transform('sum')
         print("Grouping and filtering data finished: " + str(datetime.datetime.now()))
-        return self.count_result(grouped_bios)
+        result = self.count_result(grouped_bios)
+        DataHandler.chunk_to_csv(result, "data/result/result.csv")
+
 
     def count_result(self, grouped_df):
         """

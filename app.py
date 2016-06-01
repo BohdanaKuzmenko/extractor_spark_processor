@@ -31,13 +31,11 @@ if __name__ == "__main__":
 
     extractor = Extractor()
     p = multiprocessing.Pool(4)
-    pool_results = p.map(extractor.group_data, array_split(bio_df, 4))
+    pool_results = p.map(extractor.group_data, array_split(bio_df, 31))
     p.close()
     p.join()
     p.terminate()
 
-    concatenated = concat(pool_results)
-    DataHandler.chunk_to_csv(concatenated, "data/result/result.csv", header=True)
     t2 = datetime.datetime.now()
     print("Ready result: " + str(t2))
     print("Full process time: " + str(t2 - t1))
