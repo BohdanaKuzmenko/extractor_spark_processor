@@ -22,7 +22,7 @@ def get_initial_files(dir_path):
 base_dir = abspath('')
 all_files = get_initial_files(join(base_dir,'extractor_data'))
 print(all_files)
-for file in all_files[:1]:
+for file in all_files:
     file_name = file.split('/')[-1]
     print(file_name)
     result = get_bios(file)
