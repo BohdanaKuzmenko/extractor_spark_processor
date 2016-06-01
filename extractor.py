@@ -2,21 +2,19 @@
 # -*- coding: utf-8 -*
 
 from handlers.df_handler import *
-from pandas import to_numeric
+from pandas import to_numeric, notnull
 import datetime
+from numpy import nan
 
 PROFILE_URL_COL = "url"
 SENTENCE_INDEX_COL = "sentence_num"
-SENTENCE_CONTENT_COL = "sentence"
 SPECIALTIES_COL = 'SP'
 PRACTICE_AREAS_COL = 'PA'
 REG_SCORE_COL = 'Score'
 PRACTICE_AREAS_SCORE_COL = 'practice_area_score'
-MERGED_REGEX = 'merged_regex'
 
 
 class Extractor(object):
-
     def group_data(self, filtered_bios_df):
         """
         :param filtered_bios_df: DataFrame
@@ -25,8 +23,8 @@ class Extractor(object):
         print("Grouping and filtering data started: " + str(datetime.datetime.now()))
         filtered_bios_df = split_data_frame_rows(filtered_bios_df, 'result')
         filtered_bios_df = split_data_frame_col(filtered_bios_df,
-                                                [PRACTICE_AREAS_COL, SPECIALTIES_COL, REG_SCORE_COL, MERGED_REGEX,
-                                                 SENTENCE_CONTENT_COL, SENTENCE_INDEX_COL, PROFILE_URL_COL], 'result')
+                                                [PRACTICE_AREAS_COL, SPECIALTIES_COL, REG_SCORE_COL,
+                                                 SENTENCE_INDEX_COL, PROFILE_URL_COL], 'result')
 
         filtered_bios_df[[REG_SCORE_COL, SENTENCE_INDEX_COL]] = filtered_bios_df[
             [REG_SCORE_COL, SENTENCE_INDEX_COL]].apply(to_numeric)
@@ -60,10 +58,12 @@ class Extractor(object):
         grouped_df['practice_area_info'] = join_df_cols(grouped_df, cols_to_join)
         grouped_df.drop(cols_to_join, inplace=True, axis=1)
 
+        grouped_df = grouped_df.fillna('')
         grouped_bios = grouped_df.groupby([PROFILE_URL_COL, SENTENCE_INDEX_COL])['practice_area_info'] \
             .agg({'result': lambda x: tuple(self.remove_conflicts(x, ))})
 
-        grouped_bios = grouped_bios.fillna('')
+        grouped_bios = grouped_bios.astype(object).replace(nan, 'None')
+
         grouped_bios = split_data_frame_rows(grouped_bios, 'result')
 
         split_cols = [SPECIALTIES_COL, PRACTICE_AREAS_COL, REG_SCORE_COL]
@@ -82,7 +82,6 @@ class Extractor(object):
 
         grouped_bios = grouped_bios.groupby([PROFILE_URL_COL])[SPECIALTIES_COL, PRACTICE_AREAS_COL].agg(
             {"Predictions": lambda x: ', '.join([i for i in set(x, ) if i])}).reset_index()
-        print("Count result finished: " + str(datetime.datetime.now()))
         return grouped_bios
 
     def get_max_scored_sp(self, specialities_info):
@@ -125,8 +124,10 @@ class Extractor(object):
         :param data_frame:pd.DataFrame
         :return: limited list of practice areas and specialties
         """
+        data_frame = data_frame.fillna('')
+
         max_scored_limit = 2
-        sorted_data = sorted(set(data_frame), key=lambda x: int(x[2]), reverse=True)
+        sorted_data = sorted(set(data_frame), key=lambda x: x[2], reverse=True)
         appropriate_data = []
         for bio_info in sorted_data:
             if len(appropriate_data) < max_scored_limit or bio_info[2] == appropriate_data[-1][2]:
