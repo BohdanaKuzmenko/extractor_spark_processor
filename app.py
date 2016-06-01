@@ -2,15 +2,16 @@ import ast
 import datetime
 import multiprocessing
 from os import listdir
-from os.path import isfile, join, dirname
+from os.path import isfile, join, dirname, abspath
 from pandas import concat, set_option, read_csv
 from numpy import array_split
 from extractor import Extractor
 from handlers.io_data_handler import *
+
 from handlers.df_handler import *
 
 # set_option('display.max_colwidth', -1)
-BASE_DIR = dirname(dirname(__file__))
+BASE_DIR = abspath('')
 
 
 def get_initial_files(dir_path):
@@ -39,9 +40,10 @@ def test(x):
     return (bio_sent_item.get('url'), tuple([bio_sent_item.get(key) for key in sorted(bio_sent_item)]))
 
 if __name__ == "__main__":
+
     t1 = datetime.datetime.now()
     print("Process started: " + str(t1))
-    initial_files= get_initial_files(join(BASE_DIR,'extractor/data/initial'))
+    initial_files= get_initial_files(join(BASE_DIR,'data/initial'))
 
     data = get_bios(initial_files)
     data = split_data_frame_col(data, ['url', 'full_info'], data.columns[0])
