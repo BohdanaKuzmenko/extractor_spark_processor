@@ -62,7 +62,7 @@ class Extractor(object):
         grouped_bios = grouped_df.groupby([PROFILE_URL_COL, SENTENCE_INDEX_COL])['practice_area_info'] \
             .agg({'result': lambda x: tuple(self.remove_conflicts(x, ))})
 
-        grouped_bios = grouped_bios.astype(object).replace(nan, 'None')
+        grouped_bios = grouped_bios.fillna('')
 
         grouped_bios = split_data_frame_rows(grouped_bios, 'result')
 
@@ -82,6 +82,7 @@ class Extractor(object):
 
         grouped_bios = grouped_bios.groupby([PROFILE_URL_COL])[SPECIALTIES_COL, PRACTICE_AREAS_COL].agg(
             {"Predictions": lambda x: ', '.join([i for i in set(x, ) if i])}).reset_index()
+        print("Count result finished: " + str(datetime.datetime.now()))
         return grouped_bios
 
     def get_max_scored_sp(self, specialities_info):
